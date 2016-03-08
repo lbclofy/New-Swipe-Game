@@ -33,6 +33,25 @@ function Obstacles:newPolygon( vertices )
 	return polygon
 end
 
+function Obstacles:newBorder( w, h )
+
+	--local boxGroup = display.newGroup()
+	local border = display.newRect( 0, 0, w, h )
+	border.rotation = boxRotate
+	border:setFillColor(1,0,0)
+
+	physics.addBody( border, "static", { density=1.0 , friction=0.5, bounce=0.3 } )
+
+	local function onLocalCollision( self, event )
+		
+    	physics.pause()
+	end
+	border.collision = onLocalCollision
+	border:addEventListener( "collision", border )
+
+	return border
+end
+
 function Obstacles:newPegField(w, h, rotation)
 
 	local pegSize = _H*.005

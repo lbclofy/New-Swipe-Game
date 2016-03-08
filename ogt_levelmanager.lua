@@ -581,7 +581,6 @@ function k.loadCurrLevel()
 	local success = false
 	if k.anotherLevel(levelNum) then
 		success = true
-		k.currentLevel = levelNum + 1
 		local newScene = k.playScene or k.sequentialScene .. tostring(k.currentLevel)
 		if k.sceneNames and k.sceneNames[levelNum] then
 			newScene = k.sceneNames[levelNum]

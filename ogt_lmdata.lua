@@ -141,7 +141,7 @@ k.lockOffsetY = -5
 
 -- storyboard effect and time for switching from level selector to chosen level.
 k.sboardEffect = "crossFade"
-k.sboardTime = 700
+k.sboardTime = 1000
 
 -- how fast does the level selector slide when using next/prev arrows
 k.slideTime = 300 	-- milliseconds (lower number = faster slide)

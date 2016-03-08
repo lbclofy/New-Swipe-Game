@@ -28,68 +28,35 @@ end
 function scene:create( event )
 
     local sceneGroup = self.view
+
     local scrollGroup = display.newGroup()
-    local goalY = _H*1.2
 
     physics.start()
 
-    local leftBorder = obs:newBorder(10, _H)
-    leftBorder.x, leftBorder.y = 0, centerY
-    sceneGroup:insert(leftBorder)
-
-    local rightBorder = obs:newBorder(10, _H)
-    rightBorder.x, rightBorder.y = _W, centerY
-    sceneGroup:insert(rightBorder)
-
-    local botBorder = obs:newBorder(_W, 10)
-    botBorder.x, botBorder.y = centerX, goalY
-    scrollGroup:insert(botBorder)
-
-
-
-    local box2 = obs:newCircle(50)
-    box2.x, box2.y = 100,200
-    scrollGroup:insert(box2)
-
-    local box1 = obs:newBox(100,100)
-    box1.x, box1.y = 150,400
-    scrollGroup:insert(box1)
-
-
-    local pegField = obs:newPegField(400,800)
-    for k, v in pairs(pegField) do
-        pegField[k].x = pegField[k].x + 100
-        pegField[k].y = pegField[k].y + 100
-        scrollGroup:insert(pegField[k])
-    end
-
-    local polygon = obs:newPolygon({ 0,-37, 37,-10, 23,34, -23,34, -37,-10 })
-    polygon.x, polygon.y = 10,600
-    scrollGroup:insert(polygon)
-
     gameBall = po:newBall()
     gameBall.x, gameBall.y = centerX, _H*.02
+     scrollGroup:insert(gameBall)
     gameBall:applyForce( math.random(-1, 1), math.random(-1, 1), gameBall.x, gameBall.y )
-    scrollGroup:insert(gameBall)
+
+    local star = po:newStar()
+    star.x, star.y = centerX, _H*.3
+     scrollGroup:insert(star)
+
 
 
     local gameGoal = po:newGoal()
-    gameGoal.x, gameGoal.y = centerX, goalY
-     scrollGroup:insert(gameGoal)
-
-     sceneGroup:insert(scrollGroup)
-
-
+    gameGoal.x, gameGoal.y = centerX, _H*.95
+    scrollGroup:insert(gameGoal)
 
     local bg = ui:newScroll(scrollGroup,gameGoal.y)
     sceneGroup:insert(bg)
 
     local start = ui:newStart()
-    start.x, start.y = _W*.1, _H*.05
+    start.x, start.y = _W*.1, _H*.1
      sceneGroup:insert(start)
 
     local menu = ui:newMenu()
-    menu.x, menu.y = _W*.8, _H*.05
+    menu.x, menu.y = _W*.8, _H*.1
      sceneGroup:insert(menu)
 
     -- Initialize the scene here
