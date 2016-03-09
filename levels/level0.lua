@@ -4,6 +4,7 @@ physics.setDrawMode("hybrid")
 local obs = require("objects.obstacles")
 local po = require("objects.playobjects")
 local ui = require("objects.uielements")
+local drawUI = require("draw")
 
 
 local scene = composer.newScene()
@@ -56,8 +57,8 @@ function scene:create( event )
     gameGoal.x, gameGoal.y = centerX, _H*1.25
     scrollGroup:insert(gameGoal)
 
-    local bg = ui:newScroll(scrollGroup,gameGoal.y)
-    sceneGroup:insert(bg)
+    --local bg = ui:newScroll(scrollGroup,gameGoal.y)
+    --sceneGroup:insert(bg)
 
     local start = ui:newStart()
     start.x, start.y = _W*.1, _H*.1
@@ -66,6 +67,8 @@ function scene:create( event )
     local menu = ui:newMenu()
     menu.x, menu.y = _W*.8, _H*.1
      sceneGroup:insert(menu)
+
+
 
     -- Initialize the scene here
     -- Example: add display objects to "sceneGroup", add touch listeners, etc.

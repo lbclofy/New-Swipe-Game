@@ -2,6 +2,7 @@ UIElements = {}
 
 local composer = require( "composer" )
 local widget = require( "widget" )
+local drawUI = require("draw")
 
 function UIElements:newStart( )
 
@@ -70,7 +71,8 @@ function UIElements:newScroll( group, botY)
 	        height = _H,
 	        scrollWidth = _W,
 	        scrollHeight = endY,
-	        listener = scrollListener
+	        listener = scrollListener,
+	        horizontalScrollDisabled = true,
 	    }
 	)
 	scrollView:insert( group )
@@ -83,6 +85,10 @@ function UIElements:newDraw( )
 	local draw = display.newText( "Draw", 0, 0, native.systemFont, 16 )
 	draw:setFillColor(0,0,0)
 
+	local function onObjectTap( event )
+	end 
+	draw.tap = onObjectTap
+draw:addEventListener( "tap", object )
 
 	return draw
 end

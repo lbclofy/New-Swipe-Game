@@ -1,13 +1,14 @@
 local composer = require( "composer" )
 local physics = require ( "physics" )
-physics.setDrawMode("hybrid")
 local obs = require("objects.obstacles")
 local po = require("objects.playobjects")
 local ui = require("objects.uielements")
-local lvls = require('levels.levels')
+local lvls = require("levels.levels")
+local drawUI = require("draw")
 
 
 local scene = composer.newScene()
+physics.setDrawMode("hybrid")
 
 -- -----------------------------------------------------------------------------------------------------------------
 -- All code outside of the listener functions will only be executed ONCE unless "composer.removeScene()" is called
@@ -98,10 +99,16 @@ function scene:create( event )
 
     sceneGroup:insert(scrollGroup)
 
-
+        
 
     local bg = ui:newScroll(scrollGroup,gameGoal.y)
+        bg:setIsLocked( true ) 
     sceneGroup:insert(bg)
+
+
+    local canvas = drawUI.newCanvas()
+    sceneGroup:insert(canvas)
+    canvas:toFront()
 
     local start = ui:newStart()
     start.x, start.y = _W*.1, _H*.05
@@ -114,6 +121,10 @@ function scene:create( event )
     local draw = ui:newDraw()
     draw.x, draw.y = _W*.25, _H*.05
     sceneGroup:insert(draw)
+
+   
+
+   -- drawUI.drawOff()
 
     -- Initialize the scene here
     -- Example: add display objects to "sceneGroup", add touch listeners, etc.
