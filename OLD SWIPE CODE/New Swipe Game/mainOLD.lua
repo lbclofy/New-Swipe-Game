@@ -142,12 +142,6 @@ local function deleteEnd()
 	end
 end 
 
-local function makeArrow()
-arrow = display.newImage(  "arrow.png",  357, 248 )
-arrow.x = _W/2
-arrow.y = _H/2
-arrow.alpha = 0
-end
 
 
 

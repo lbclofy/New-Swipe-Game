@@ -4,7 +4,7 @@ local obs = require("objects.obstacles")
 local po = require("objects.playobjects")
 local ui = require("objects.uielements")
 local lvls = require("levels.levels")
-local drawUI = require("draw_lofy")
+local drawUI = require("draw")
 
 
 local scene = composer.newScene()
@@ -101,15 +101,14 @@ function scene:create( event )
 
         
 
-    local bg = ui:newScroll(scrollGroup,gameGoal.y)
-        bg:setIsLocked( true ) 
-    sceneGroup:insert(bg)
+  --  local bg = ui:newScroll(scrollGroup,gameGoal.y)
+  --      bg:setIsLocked( true ) 
+   -- sceneGroup:insert(bg)
 
-drawUI.setupDraw()
-drawUI.drawOn()
-  --  local canvas = drawUI.newCanvas()
-  --  sceneGroup:insert(canvas)
- --   canvas:toFront()
+
+    local canvas = drawUI.newCanvas()
+    sceneGroup:insert(canvas)
+    canvas:toFront()
 
     local start = ui:newStart()
     start.x, start.y = _W*.1, _H*.05
@@ -139,6 +138,7 @@ function scene:show( event )
     local phase = event.phase
 
     if ( phase == "will" ) then
+
         physics.pause()
         -- Called when the scene is still off screen (but is about to come on screen)
     elseif ( phase == "did" ) then

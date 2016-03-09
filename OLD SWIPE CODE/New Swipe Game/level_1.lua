@@ -3,6 +3,7 @@ local composer = require( "composer" )
 local obstacles = require("obstacles")
 local goal = require("goal")
 local ball = require("gameball")
+local draw = require("draw")
 
 local scene = composer.newScene()
 
@@ -87,6 +88,8 @@ function scene:create( event )
     startButton.main:setFillColor(.05,.05,.05*.05)
 
     startButton:addEventListener("tap", listener)
+
+    draw.setupDraw()
 
     -- Initialize the scene here
     -- Example: add display objects to "sceneGroup", add touch listeners, etc.
