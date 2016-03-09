@@ -110,11 +110,6 @@ end
 
 -- "scene:create()"
 function scene:create( event )
-
-    local previousScene = composer.getPrevious()
-    if previousScene then
-        composer.removeScene(previousScene)
-    end
     
     local sceneGroup = self.view
     local background = display.newRect(sceneGroup, centerX,centerY, _W,_H)

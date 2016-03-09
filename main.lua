@@ -7,6 +7,7 @@
 local performance = require('performance')
 performance:newPerformanceMeter()
 
+
 -- hide the status bar
 display.setStatusBar( display.HiddenStatusBar )
 
@@ -17,6 +18,7 @@ _G.centerY = _H*.5
 
 _G.scale = _H/960
 _G.ballR = _W*.025
+_G.phi = 1.61803398875
 
 _G.maxSpeed  = _W
 
@@ -269,6 +271,7 @@ local function convertDecToTens( number )
 
 end
 _G.convertDecToTens = convertDecToTens
+
 
 local composer = require( "composer" )
 composer.recycleOnSceneChange = true

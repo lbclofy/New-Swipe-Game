@@ -15,16 +15,34 @@ function PlayObjects:newBall( )
 end
 
 function PlayObjects:newStar( )
+	local starR = ballR*1.5
+	local starRI = starR*.382
 
-
-	local vertices = { 0,-37, 37,-10, 23,34, -23,34, -37,-10 }
+	local vertices = { starR*math.cos( math.rad( -90 )), starR*math.sin( math.rad( -90 )),
+	starRI*math.cos( math.rad( -54 )), starRI*math.sin( math.rad( -54 )), 
+	starR *math.cos( math.rad( -18 )), starR*math.sin( math.rad( -18 )),
+	starRI*math.cos( math.rad( 18 )),  starRI*math.sin( math.rad( 18 )), 
+	starR *math.cos( math.rad( 54 )),  starR*math.sin( math.rad( 54 )),
+	starRI*math.cos( math.rad( 90 )),  starRI*math.sin( math.rad( 90 )), 
+	starR *math.cos( math.rad( 126 )), starR*math.sin( math.rad( 126 )),
+	starRI*math.cos( math.rad( 162 )), starRI*math.sin( math.rad( 162 )), 
+	starR *math.cos( math.rad( 198 )), starR*math.sin( math.rad( 198 )),
+	starRI*math.cos( math.rad( 234 )), starRI*math.sin( math.rad( 234 )),  }
 
 	local star = display.newPolygon( 0, 0, vertices )
 	star:setFillColor(0,0,0)
 	star.type = "star"
 
-	physics.addBody( star, "static", { density=1.0 , friction=0.5, bounce=0.6, radius = ballR } )
+	physics.addBody( star, "static", { density=1.0 , friction=0.5, bounce=0.6, radius = starR } )
 	star.isSensor = true
+
+	local function onLocalCollision( self, event )
+    	print( event.target )
+    	print( event.other )           --the first object in the collision
+    	display.remove(event.target)
+	end
+	star.collision = onLocalCollision
+	star:addEventListener( "collision", star )
 
 
 	return star

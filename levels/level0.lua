@@ -39,13 +39,21 @@ function scene:create( event )
     gameBall:applyForce( math.random(-1, 1), math.random(-1, 1), gameBall.x, gameBall.y )
 
     local star = po:newStar()
-    star.x, star.y = centerX, _H*.3
-     scrollGroup:insert(star)
+    star.x, star.y = centerX, _H*.25
+    scrollGroup:insert(star)
+
+    local star = po:newStar()
+    star.x, star.y = centerX, _H*.5
+    scrollGroup:insert(star)
+
+    local star = po:newStar()
+    star.x, star.y = centerX, _H*.75
+    scrollGroup:insert(star)
 
 
 
     local gameGoal = po:newGoal()
-    gameGoal.x, gameGoal.y = centerX, _H*.95
+    gameGoal.x, gameGoal.y = centerX, _H*1.25
     scrollGroup:insert(gameGoal)
 
     local bg = ui:newScroll(scrollGroup,gameGoal.y)

@@ -4,6 +4,7 @@ physics.setDrawMode("hybrid")
 local obs = require("objects.obstacles")
 local po = require("objects.playobjects")
 local ui = require("objects.uielements")
+local lvls = require('levels.levels')
 
 
 local scene = composer.newScene()
@@ -46,7 +47,7 @@ function scene:create( event )
     scrollGroup:insert(botBorder)
 
 
-
+--[[
     local box2 = obs:newCircle(50)
     box2.x, box2.y = 100,200
     scrollGroup:insert(box2)
@@ -54,6 +55,8 @@ function scene:create( event )
     local box1 = obs:newBox(100,100)
     box1.x, box1.y = 150,400
     scrollGroup:insert(box1)
+
+    
 
 
     local pegField = obs:newPegField(400,800)
@@ -65,7 +68,7 @@ function scene:create( event )
 
     local polygon = obs:newPolygon({ 0,-37, 37,-10, 23,34, -23,34, -37,-10 })
     polygon.x, polygon.y = 10,600
-    scrollGroup:insert(polygon)
+    scrollGroup:insert(polygon)]]
 
     gameBall = po:newBall()
     gameBall.x, gameBall.y = centerX, _H*.02
@@ -75,9 +78,25 @@ function scene:create( event )
 
     local gameGoal = po:newGoal()
     gameGoal.x, gameGoal.y = centerX, goalY
-     scrollGroup:insert(gameGoal)
+    scrollGroup:insert(gameGoal)
 
-     sceneGroup:insert(scrollGroup)
+    for k, v in pairs(lvls.levels[1]) do
+        if k <=3 then
+            print("Making Star @ x: " .. lvls.levels[1][k][1] .. " y: " .. lvls.levels[1][k][2])
+            local star = po:newStar()
+            star.x, star.y = lvls.levels[1][k][1], lvls.levels[1][k][2]
+            scrollGroup:insert(star)
+        else
+            if (lvls.levels[1][k][1] == 1) then
+
+            else
+                print(lvls.levels[1][i][1])
+            end
+        end
+    end
+
+
+    sceneGroup:insert(scrollGroup)
 
 
 
@@ -86,11 +105,15 @@ function scene:create( event )
 
     local start = ui:newStart()
     start.x, start.y = _W*.1, _H*.05
-     sceneGroup:insert(start)
+    sceneGroup:insert(start)
 
     local menu = ui:newMenu()
     menu.x, menu.y = _W*.8, _H*.05
-     sceneGroup:insert(menu)
+    sceneGroup:insert(menu)
+
+    local draw = ui:newDraw()
+    draw.x, draw.y = _W*.25, _H*.05
+    sceneGroup:insert(draw)
 
     -- Initialize the scene here
     -- Example: add display objects to "sceneGroup", add touch listeners, etc.

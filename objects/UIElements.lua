@@ -25,8 +25,6 @@ function UIElements:newMenu( )
 	local menu = display.newText( "Menu", 0, 0, native.systemFont, 16 )
 	menu:setFillColor(0,0,0)
 
-	
-
 	local function gotoMenu( self, event )
 	    composer.gotoScene( "menu" )
 	    return true
@@ -37,14 +35,10 @@ function UIElements:newMenu( )
 	return menu
 end
 
+
+
 function UIElements:newScroll( group, botY)
-
 	local endY =  botY or _H
-	
-	
-
-	--local bg = display.newRect( centerX, centerY, _W, _H )
-	--bg:setFillColor(1,0,0, .5)
 
 	-- ScrollView listener
 	local function scrollListener( event )
@@ -84,6 +78,14 @@ function UIElements:newScroll( group, botY)
 	return scrollView
 end
 
+function UIElements:newDraw( )
+
+	local draw = display.newText( "Draw", 0, 0, native.systemFont, 16 )
+	draw:setFillColor(0,0,0)
+
+
+	return draw
+end
 
 
 
