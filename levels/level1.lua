@@ -4,7 +4,7 @@ local obs = require("objects.obstacles")
 local po = require("objects.playobjects")
 local ui = require("objects.uielements")
 local lvls = require("levels.levels")
-local drawUI = require("draw")
+local drawUI = require("draw_lofy")
 
 
 local scene = composer.newScene()
@@ -105,10 +105,11 @@ function scene:create( event )
         bg:setIsLocked( true ) 
     sceneGroup:insert(bg)
 
-
-    local canvas = drawUI.newCanvas()
-    sceneGroup:insert(canvas)
-    canvas:toFront()
+drawUI.setupDraw()
+drawUI.drawOn()
+  --  local canvas = drawUI.newCanvas()
+  --  sceneGroup:insert(canvas)
+ --   canvas:toFront()
 
     local start = ui:newStart()
     start.x, start.y = _W*.1, _H*.05
