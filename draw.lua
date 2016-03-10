@@ -62,20 +62,21 @@ function fingerPaint.newCanvas(...)
 	local arguments = {...}
 	local params = arguments[1]
 	if params == nil then params = {} end
+
+	print(params.group)
+	print(params.scrollView)
+	print(params.scrollView.isLocked)
 	
+
 	
 	--------------------------------------------------------------------------------
 	-- LOCALIZE PARAMS & SET DEFAULTS
 	--------------------------------------------------------------------------------
-	local width = params.width or screenWidth
-	local height = params.height or screenHeight
 	local strokeWidth = params.strokeWidth or 10
+	local group = params.group
+	local scrollView = params.scrollView
+
 	local canvasColor = params.canvasColor or {1, 1, 1, 1}
-		if canvasColor[4] == nil then canvasColor[4] = 1 end
-		local canvasR = canvasColor[1]
-		local canvasG = canvasColor[2]
-		local canvasB = canvasColor[3]
-		local canvasA = canvasColor[4]
 	local paintColor = params.paintColor or {0, 0, 0, 1}
 		if paintColor[4] == nil then paintColor[4] = 1 end
 		local paintR = paintColor[1]
@@ -85,12 +86,12 @@ function fingerPaint.newCanvas(...)
 	local x = params.x or centerX
 	local y = params.y or centerY
 	local isActive = params.isActive or true
-	local circleRadius = strokeWidth * .5
+	local circleRadius = strokeWidth *.5
 	
 	--------------------------------------------------------------------------------
 	-- CREATE CANVAS CONTAINER OBJECT
 	--------------------------------------------------------------------------------
-	local canvas = display.newContainer(width, height)
+	local canvas = display.newContainer(_W, _H)
 	canvas.x, canvas.y = x, y
 	canvas.isActive = isActive
 	canvas.paintR, canvas.paintG, canvas.paintB, canvas.paintA = paintR, paintG, paintB, paintA
@@ -99,8 +100,8 @@ function fingerPaint.newCanvas(...)
 	--------------------------------------------------------------------------------
 	-- CREATE CANVAS BACKGROUND RECT
 	--------------------------------------------------------------------------------
-	local background = display.newRect(canvas, screenLeft - screenWidth, screenTop - screenHeight, screenWidth * 3, screenHeight * 3)
-	background:setFillColor(canvasR, canvasG, canvasB)
+	local background = display.newRect(canvas, _W, _H, _W * 3, _H * 3)
+	background:setFillColor(0, 0, 0, 0)
 	background.isHitTestable = true
 		
 	--------------------------------------------------------------------------------
@@ -112,11 +113,21 @@ function fingerPaint.newCanvas(...)
 	--------------------------------------------------------------------------------
 	-- CREATE TABLE TO HOLD UNDONE PAINT STROKES
 	--------------------------------------------------------------------------------
+		canvas.undone = {}
 	local undone = canvas.undone
+
 	--------------------------------------------------------------------------------
 	-- SET VARIABLE TO TEST IF TOUCHES BEGAN ON CANVAS
 	--------------------------------------------------------------------------------
 	local touchBegan = false
+
+	local function angleBetween(x1,y1,x2,y2)
+		return math.rad(math.ceil(math.atan2((y2-y1),(x2-x1))*180*math.pi^-1)+90)
+	end
+
+	local function distanceBetween(x1,y1,x2,y2)
+		return math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
+	end
 	
 	--------------------------------------------------------------------------------
 	-- TOUCH EVENT HANDLER FUNCTION
@@ -129,8 +140,8 @@ function fingerPaint.newCanvas(...)
 		
 		-- recalculate touch cooridnates, taking into account canvas position
 		local canvasX, canvasY = canvas:localToContent(canvas.anchorX, canvas.anchorY)
-		local x = event.x - canvasX
-		local y = event.y - canvasY
+		local x = event.x -- canvasX
+		local y = event.y -- canvasY
 		local xStart = event.xStart - canvasX
 		local yStart = event.yStart - canvasY
 		
@@ -154,27 +165,69 @@ function fingerPaint.newCanvas(...)
 			-- start stroke
 			display.getCurrentStage():setFocus(target, event.id)
 			touchBegan = true
+
 			strokes[#strokes+1] = display.newGroup()
 			stroke = strokes[#strokes]
 			canvas:insert(stroke)
 			local circle = display.newCircle(stroke, x, y, circleRadius)
+			group:insert(circle)
 			circle:setFillColor(paintR, paintG, paintB, paintA)
 			target.lastX, target.lastY = x, y
+
+
 		elseif phase=="moved" and touchBegan == true and distance > circleRadius*.5 then
-			-- append to stroke
+
+					print("oldX: ".. target.lastX .. " oldY: ".. target.lastY)
+					print("x: ".. x .. " y: " ..  y)
 
 					stroke.circle = display.newCircle(stroke, x, y, circleRadius)
 					stroke.circle:setFillColor(paintR, paintG, paintB, paintA)
-			stroke.line:setStrokeColor(paintR, paintG, paintB, paintA)
-			stroke.line.strokeWidth = strokeWidth
-			target.lastX, target.lastY = x, y
+					group:insert(stroke.circle)
+
+
+
+					stroke.line = display.newLine(stroke, target.lastX, target.lastY, x, y)
+					group:insert(stroke.line)
+
+					local angle = angleBetween( 0, 0 , target.lastX - x, target.lastY - y)
+					local cosAngle = math.cos(angle)*circleRadius
+					local sinAngle = math.sin(angle)*circleRadius
+					local oldX = x - target.lastX
+					local oldY = y - target.lastY
+
+
+					local rectShape={
+					 cosAngle,  sinAngle,
+					-cosAngle, -sinAngle,
+					oldX - cosAngle, oldY - sinAngle,
+					oldX + cosAngle, oldY + sinAngle }
+
+					
+
+
+
+					physics.addBody( stroke.line, "static", { density=0, friction=0, bounce=0, shape = rectShape} )
+
+										stroke.line:setStrokeColor(paintR, paintG, paintB, paintA)
+					stroke.line.strokeWidth = strokeWidth
+					
+
+					target.lastX, target.lastY = x, y
+
+
 		elseif (phase == "cancelled" or phase == "ended") and touchBegan == true then
 			-- end stroke
 			display.getCurrentStage():setFocus(nil, event.id)
 			touchBegan = false
 			local circle = display.newCircle(stroke, x, y, circleRadius)
-				circle:setFillColor(paintR, paintG, paintB, paintA)
+			circle:setFillColor(paintR, paintG, paintB, paintA)
+			group:insert(circle)
+
 			target.lastX, target.lastY = nil, nil
+
+			scrollView:setIsLocked( false ) 
+
+			--canvas.isActive = false
 			return true
 		end
 	end
