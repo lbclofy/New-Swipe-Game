@@ -4,6 +4,7 @@ local obs = require("objects.obstacles")
 local po = require("objects.playobjects")
 local ui = require("objects.uielements")
 local lvls = require("levels.levels")
+--local drawUI = require("draw_lofy")
 local drawUI = require("draw")
 
 
@@ -34,6 +35,12 @@ function scene:create( event )
     local goalY = _H*1.2
 
     physics.start()
+
+
+
+
+--drawUI.setupDraw(scrollGroup)
+
 
     local leftBorder = obs:newBorder(10, _H)
     leftBorder.x, leftBorder.y = 0, centerY
@@ -95,20 +102,13 @@ function scene:create( event )
             end
         end
     end
-
+   -- bg:setScrollWidth(_W*.5)
 
     sceneGroup:insert(scrollGroup)
 
-        
+    local bg = ui:newScroll( scrollGroup,goalY)
+    sceneGroup:insert(bg)
 
-  --  local bg = ui:newScroll(scrollGroup,gameGoal.y)
-  --      bg:setIsLocked( true ) 
-   -- sceneGroup:insert(bg)
-
-
-    local canvas = drawUI.newCanvas()
-    sceneGroup:insert(canvas)
-    canvas:toFront()
 
     local start = ui:newStart()
     start.x, start.y = _W*.1, _H*.05
@@ -117,13 +117,16 @@ function scene:create( event )
     local menu = ui:newMenu()
     menu.x, menu.y = _W*.8, _H*.05
     sceneGroup:insert(menu)
-
-    local draw = ui:newDraw()
+    local draw = ui:newDraw(bg)
     draw.x, draw.y = _W*.25, _H*.05
     sceneGroup:insert(draw)
 
-   
+    
+    --bg:setIsLocked( true ) 
+    
 
+    local canvas = drawUI.newCanvas({group = scrollGroup,  scrollView = bg})
+    sceneGroup:insert(canvas)
    -- drawUI.drawOff()
 
     -- Initialize the scene here

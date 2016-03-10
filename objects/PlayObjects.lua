@@ -18,15 +18,16 @@ function PlayObjects:newStar( )
 	local starR = ballR*1.5
 	local starRI = starR*.382
 
-	local vertices = { starR*math.cos( math.rad( -90 )), starR*math.sin( math.rad( -90 )),
+	local vertices = { 
+	starR *math.cos( math.rad( -90 )), starR *math.sin( math.rad( -90 )),
 	starRI*math.cos( math.rad( -54 )), starRI*math.sin( math.rad( -54 )), 
-	starR *math.cos( math.rad( -18 )), starR*math.sin( math.rad( -18 )),
-	starRI*math.cos( math.rad( 18 )),  starRI*math.sin( math.rad( 18 )), 
-	starR *math.cos( math.rad( 54 )),  starR*math.sin( math.rad( 54 )),
-	starRI*math.cos( math.rad( 90 )),  starRI*math.sin( math.rad( 90 )), 
-	starR *math.cos( math.rad( 126 )), starR*math.sin( math.rad( 126 )),
+	starR *math.cos( math.rad( -18 )), starR *math.sin( math.rad( -18 )),
+	starRI*math.cos( math.rad( 018 )), starRI*math.sin( math.rad( 018 )), 
+	starR *math.cos( math.rad( 054 )), starR *math.sin( math.rad( 054 )),
+	starRI*math.cos( math.rad( 090 )), starRI*math.sin( math.rad( 090 )), 
+	starR *math.cos( math.rad( 126 )), starR *math.sin( math.rad( 126 )),
 	starRI*math.cos( math.rad( 162 )), starRI*math.sin( math.rad( 162 )), 
-	starR *math.cos( math.rad( 198 )), starR*math.sin( math.rad( 198 )),
+	starR *math.cos( math.rad( 198 )), starR *math.sin( math.rad( 198 )),
 	starRI*math.cos( math.rad( 234 )), starRI*math.sin( math.rad( 234 )),  }
 
 	local star = display.newPolygon( 0, 0, vertices )

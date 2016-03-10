@@ -59,7 +59,7 @@ function UIElements:newScroll( group, botY)
 	        end
 	    end
 
-	    return true
+	--    return true
 	end
 
 	-- Create the widget
@@ -71,8 +71,10 @@ function UIElements:newScroll( group, botY)
 	        height = _H,
 	        scrollWidth = _W,
 	        scrollHeight = endY,
+	        hideScrollBar = false,
 	        listener = scrollListener,
 	        horizontalScrollDisabled = true,
+	        backgroundColor = { 0, 0, 1, .1 }
 	    }
 	)
 	scrollView:insert( group )
@@ -80,15 +82,16 @@ function UIElements:newScroll( group, botY)
 	return scrollView
 end
 
-function UIElements:newDraw( )
+function UIElements:newDraw( scrollView )
 
 	local draw = display.newText( "Draw", 0, 0, native.systemFont, 16 )
 	draw:setFillColor(0,0,0)
 
 	local function onObjectTap( event )
+		scrollView:setIsLocked( true ) 
 	end 
 	draw.tap = onObjectTap
-draw:addEventListener( "tap", object )
+	draw:addEventListener( "tap", object )
 
 	return draw
 end

@@ -123,7 +123,8 @@ function scene:create( event )
     contNav.text:setFillColor(0,0,0)
 
     local function listener()
-        lm.loadCurrLevel()
+        --lm.loadCurrLevel()
+        composer.gotoScene( "levels.level1" )
     end
     contNav:addEventListener("tap", listener)
 

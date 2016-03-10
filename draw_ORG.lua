@@ -63,19 +63,13 @@ function fingerPaint.newCanvas(...)
 	local params = arguments[1]
 	if params == nil then params = {} end
 	
+
 	
 	--------------------------------------------------------------------------------
 	-- LOCALIZE PARAMS & SET DEFAULTS
 	--------------------------------------------------------------------------------
-	local width = params.width or screenWidth
-	local height = params.height or screenHeight
 	local strokeWidth = params.strokeWidth or 10
 	local canvasColor = params.canvasColor or {1, 1, 1, 1}
-		if canvasColor[4] == nil then canvasColor[4] = 1 end
-		local canvasR = canvasColor[1]
-		local canvasG = canvasColor[2]
-		local canvasB = canvasColor[3]
-		local canvasA = canvasColor[4]
 	local paintColor = params.paintColor or {0, 0, 0, 1}
 		if paintColor[4] == nil then paintColor[4] = 1 end
 		local paintR = paintColor[1]
@@ -90,7 +84,7 @@ function fingerPaint.newCanvas(...)
 	--------------------------------------------------------------------------------
 	-- CREATE CANVAS CONTAINER OBJECT
 	--------------------------------------------------------------------------------
-	local canvas = display.newContainer(width, height)
+	local canvas = display.newContainer(_W, _H)
 	canvas.x, canvas.y = x, y
 	canvas.isActive = isActive
 	canvas.paintR, canvas.paintG, canvas.paintB, canvas.paintA = paintR, paintG, paintB, paintA
@@ -99,8 +93,8 @@ function fingerPaint.newCanvas(...)
 	--------------------------------------------------------------------------------
 	-- CREATE CANVAS BACKGROUND RECT
 	--------------------------------------------------------------------------------
-	local background = display.newRect(canvas, screenLeft - screenWidth, screenTop - screenHeight, screenWidth * 3, screenHeight * 3)
-	background:setFillColor(canvasR, canvasG, canvasB)
+	local background = display.newRect(canvas, _W, _H, _W * 3, _H * 3)
+	background:setFillColor(0, 0, 0, 0)
 	background.isHitTestable = true
 		
 	--------------------------------------------------------------------------------
@@ -112,11 +106,21 @@ function fingerPaint.newCanvas(...)
 	--------------------------------------------------------------------------------
 	-- CREATE TABLE TO HOLD UNDONE PAINT STROKES
 	--------------------------------------------------------------------------------
+		canvas.undone = {}
 	local undone = canvas.undone
+
 	--------------------------------------------------------------------------------
 	-- SET VARIABLE TO TEST IF TOUCHES BEGAN ON CANVAS
 	--------------------------------------------------------------------------------
 	local touchBegan = false
+
+	local function angleBetween(x1,y1,x2,y2)
+		return  math.ceil(math.atan2((y2-y1),(x2-x1))*180*math.pi^-1)+90
+	end
+
+	local function distanceBetween(x1,y1,x2,y2)	
+		return math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
+	end
 	
 	--------------------------------------------------------------------------------
 	-- TOUCH EVENT HANDLER FUNCTION
@@ -163,8 +167,31 @@ function fingerPaint.newCanvas(...)
 		elseif phase=="moved" and touchBegan == true and distance > circleRadius*.5 then
 			-- append to stroke
 
+			
+		--	if segmented then
+				--stroke.line = display.newLine(stroke, target.lastX, target.lastY, x, y)
+				--local circle = display.newCircle(stroke, x, y, circleRadius)
+				--circle:setFillColor(paintR, paintG, paintB, paintA)
+		--	else
+			--	if stroke.line == nil then 
+					stroke.line = display.newLine(stroke, target.lastX, target.lastY, x, y)
+
+					local angle = angleBetween(0,0 ,xStart-event.x, yStart-event.y)
+					angle=math.rad(angle)
+					local rectShape={
+					math.cos(angle)*strokeWidth,				 math.sin(angle)*strokeWidth,
+					-math.cos(angle)*strokeWidth,				-math.sin(angle)*strokeWidth,
+					xStart-event.x-math.cos(angle)*strokeWidth, yStart-event.y-math.sin(angle)*strokeWidth,
+					xStart-event.x+math.cos(angle)*strokeWidth, yStart-event.y+math.sin(angle)*strokeWidth}
+					--physics.addBody( stroke.line, "static", { density=0, friction=0, bounce=0, shape = rectShape} )
 					stroke.circle = display.newCircle(stroke, x, y, circleRadius)
+					physics.addBody( stroke.circle, "static", { density=0, friction=0, bounce=0, radius = circleRadius} )
 					stroke.circle:setFillColor(paintR, paintG, paintB, paintA)
+				--else
+				--	stroke.line:append(x, y)
+				--	stroke.circle.x, stroke.circle.y = x, y
+				--end
+		--	end
 			stroke.line:setStrokeColor(paintR, paintG, paintB, paintA)
 			stroke.line.strokeWidth = strokeWidth
 			target.lastX, target.lastY = x, y
@@ -175,6 +202,8 @@ function fingerPaint.newCanvas(...)
 			local circle = display.newCircle(stroke, x, y, circleRadius)
 				circle:setFillColor(paintR, paintG, paintB, paintA)
 			target.lastX, target.lastY = nil, nil
+
+			--canvas.isActive = false
 			return true
 		end
 	end
