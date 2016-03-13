@@ -4,12 +4,14 @@ local obs = require("objects.obstacles")
 local po = require("objects.playobjects")
 local ui = require("objects.uielements")
 local lvls = require("levels.levels")
+local lm = require("ogt_levelmanager")
 --local drawUI = require("draw_lofy")
 local drawUI = require("draw")
 
 
 local scene = composer.newScene()
 physics.setDrawMode("hybrid")
+physics.setScale( forceFactor*.10 )
 
 -- -----------------------------------------------------------------------------------------------------------------
 -- All code outside of the listener functions will only be executed ONCE unless "composer.removeScene()" is called
@@ -21,9 +23,92 @@ physics.setDrawMode("hybrid")
 
 local isPlaying = false
 local gameBall
+local levelGroup
 
 local function gameLoop()
-    print("x:" .. gameBall.x .. "y:" .. gameBall.y)
+    --print("x:" .. gameBall.x .. "y:" .. gameBall.y)
+end
+
+local function buildLevel( start )
+
+    local group = display.newGroup()
+
+    gameBall = po:newBall()
+    gameBall.x, gameBall.y = centerX, _H*.02
+    group:insert(gameBall)
+    start:resetBall( gameBall )
+
+    for k, v in pairs(lvls.levels[1]) do
+
+        if k == 1 then
+            print("Making Goal @ x: " .. lvls.levels[1][k][1] .. " y: " .. lvls.levels[1][k][2])
+            local gameGoal = po:newGoal()
+            gameGoal.x, gameGoal.y = lvls.levels[1][k][1], lvls.levels[1][k][2]
+            group:insert(gameGoal)
+        elseif k <=4 then
+            print("Making Star @ x: " .. lvls.levels[1][k][1] .. " y: " .. lvls.levels[1][k][2])
+            local star = po:newStar()
+            star.x, star.y = lvls.levels[1][k][1], lvls.levels[1][k][2]
+            group:insert(star)
+        else
+            if (lvls.levels[1][k][1] == 1) then
+                -- lvls.levels[1][k][2 = x], lvls.levels[1][k][3 = y], lvls.levels[1][k][4 = type/size], lvls.levels[1][k][5 = rotation]
+                local box = obs:newBox( lvls.levels[1][k][4], lvls.levels[1][k][5] )
+                box.x, box.y = lvls.levels[1][k][2], lvls.levels[1][k][3]
+                group:insert(box)
+
+            else
+              --  print(lvls.levels[1][i][1])
+            end
+        end
+    end
+
+
+    return group
+
+end
+
+local function resetLevel( start )
+    display.remove(levelGroup)
+    levelGroup = nil
+    levelGroup = buildLevel( start ) 
+end
+
+local function buildBorders( group1, group2, start, endY )
+
+    local function resetCollision( self, event )
+       
+        local function onTimer( event )
+            resetLevel(start)
+            group1:insert( levelGroup )
+        end
+        local tm = timer.performWithDelay( 1, onTimer )
+    end
+
+    local leftBorder = obs:newBorder(10, _H)
+    leftBorder.x, leftBorder.y = 0, centerY
+    group2:insert(leftBorder)
+    leftBorder.collision = resetCollision
+    leftBorder:addEventListener( "collision", leftBorder )
+
+    local rightBorder = obs:newBorder(10, _H)
+    rightBorder.x, rightBorder.y = _W, centerY
+    group2:insert(rightBorder)
+    rightBorder.collision = resetCollision
+    rightBorder:addEventListener( "collision", rightBorder )
+
+    local botBorder = obs:newBorder(_W, 10)
+    botBorder.x, botBorder.y = centerX, endY
+    group1:insert(botBorder)
+    botBorder.collision = resetCollision
+    botBorder:addEventListener( "collision", botBorder )
+
+    local topBorder = obs:newBorder(_W, 10)
+    topBorder.x, topBorder.y = centerX, 0
+    group1:insert(topBorder)
+    topBorder.collision = resetCollision
+    topBorder:addEventListener( "collision", topBorder )
+
 end
 
 
@@ -32,76 +117,22 @@ function scene:create( event )
 
     local sceneGroup = self.view
     local scrollGroup = display.newGroup()
-    local goalY = _H*1.2
+    
+    local goalY = lvls.levels[1][1][2]
 
     physics.start()
+    physics.setGravity( 0, 0 )
 
-
-
-
---drawUI.setupDraw(scrollGroup)
-
-
-    local leftBorder = obs:newBorder(10, _H)
-    leftBorder.x, leftBorder.y = 0, centerY
-    sceneGroup:insert(leftBorder)
-
-    local rightBorder = obs:newBorder(10, _H)
-    rightBorder.x, rightBorder.y = _W, centerY
-    sceneGroup:insert(rightBorder)
-
-    local botBorder = obs:newBorder(_W, 10)
-    botBorder.x, botBorder.y = centerX, goalY
-    scrollGroup:insert(botBorder)
-
-
---[[
-    local box2 = obs:newCircle(50)
-    box2.x, box2.y = 100,200
-    scrollGroup:insert(box2)
-
-    local box1 = obs:newBox(100,100)
-    box1.x, box1.y = 150,400
-    scrollGroup:insert(box1)
+-- NEED TO CHANGE LATER TO k.currentLevel
+    local start = ui:newStart(gameBall, lvls.startAngle[1])
+    start.x, start.y = _W*.1, _H*.05
+    sceneGroup:insert(start)
 
     
+    buildBorders( scrollGroup, sceneGroup, start , goalY + ballR * 8)
+    levelGroup = buildLevel( start )
+    scrollGroup:insert( levelGroup )
 
-
-    local pegField = obs:newPegField(400,800)
-    for k, v in pairs(pegField) do
-        pegField[k].x = pegField[k].x + 100
-        pegField[k].y = pegField[k].y + 100
-        scrollGroup:insert(pegField[k])
-    end
-
-    local polygon = obs:newPolygon({ 0,-37, 37,-10, 23,34, -23,34, -37,-10 })
-    polygon.x, polygon.y = 10,600
-    scrollGroup:insert(polygon)]]
-
-    gameBall = po:newBall()
-    gameBall.x, gameBall.y = centerX, _H*.02
-    gameBall:applyForce( math.random(-1, 1), math.random(-1, 1), gameBall.x, gameBall.y )
-    scrollGroup:insert(gameBall)
-
-
-    local gameGoal = po:newGoal()
-    gameGoal.x, gameGoal.y = centerX, goalY
-    scrollGroup:insert(gameGoal)
-
-    for k, v in pairs(lvls.levels[1]) do
-        if k <=3 then
-            print("Making Star @ x: " .. lvls.levels[1][k][1] .. " y: " .. lvls.levels[1][k][2])
-            local star = po:newStar()
-            star.x, star.y = lvls.levels[1][k][1], lvls.levels[1][k][2]
-            scrollGroup:insert(star)
-        else
-            if (lvls.levels[1][k][1] == 1) then
-
-            else
-                print(lvls.levels[1][i][1])
-            end
-        end
-    end
    -- bg:setScrollWidth(_W*.5)
 
     sceneGroup:insert(scrollGroup)
@@ -109,25 +140,36 @@ function scene:create( event )
     local bg = ui:newScroll( scrollGroup,goalY)
     sceneGroup:insert(bg)
 
-
-    local start = ui:newStart()
-    start.x, start.y = _W*.1, _H*.05
-    sceneGroup:insert(start)
-
+  
+    
     local menu = ui:newMenu()
     menu.x, menu.y = _W*.8, _H*.05
     sceneGroup:insert(menu)
-    local draw = ui:newDraw(bg)
+
+    local status = ui:newStatusBar()
+    status.x, status.y = _W*.25, _H*.1
+    sceneGroup:insert(status)
+    
+    local canvas = drawUI.newCanvas({group = scrollGroup,  scrollView = bg, statusBar = status, totalDistance = lvls.drawLength[1]})
+    sceneGroup:insert(canvas)
+
+    local draw = ui:newDraw( bg, canvas )
     draw.x, draw.y = _W*.25, _H*.05
     sceneGroup:insert(draw)
+
+    local erase = ui:newEraser(gameBall, canvas, status, _W*.6, _H*.05 )
+    sceneGroup:insert(erase)
+
+
+
+    start:toFront()
 
     
     --bg:setIsLocked( true ) 
     
 
-    local canvas = drawUI.newCanvas({group = scrollGroup,  scrollView = bg})
-    sceneGroup:insert(canvas)
-   -- drawUI.drawOff()
+
+
 
     -- Initialize the scene here
     -- Example: add display objects to "sceneGroup", add touch listeners, etc.
@@ -142,7 +184,7 @@ function scene:show( event )
 
     if ( phase == "will" ) then
 
-        physics.pause()
+       -- physics.pause()
         -- Called when the scene is still off screen (but is about to come on screen)
     elseif ( phase == "did" ) then
 

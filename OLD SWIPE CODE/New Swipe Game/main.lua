@@ -24,18 +24,17 @@ _G.shadowBlur = _W*.005
 local physics = require("physics")
 physics.start()
 
-local composer = require( "composer" )
-composer.gotoScene("menu")
+--local composer = require( "composer" )
+--composer.gotoScene("menu")
 
---physics.setDrawMode("hybrid")
-
-
---[[
---local drawLine  = require("draw")
+physics.setDrawMode("hybrid")
 
 
---drawLine.setupDraw()
---drawLine.drawOff()
+local drawLine  = require("draw")
+
+
+drawLine.setupDraw()
+drawLine.drawOff()
 
 
 local eraseButton=display.newCircle( 50,50, ballR*2)
@@ -133,6 +132,5 @@ end
 
 
 
-]]
 
 

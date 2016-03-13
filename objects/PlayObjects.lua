@@ -2,13 +2,17 @@ PlayObjects = {}
 
 local composer = require( "composer" )
 
+local ballFilter = { categoryBits=1, maskBits=3 } 
+
+
+
 function PlayObjects:newBall( )
 
 	local ball = display.newCircle(  0, 0, ballR )
 	ball:setFillColor(0,0,0)
 	ball.type = "ball"
 
-	physics.addBody( ball, { density=1.0 , friction=0.5, bounce=0.6, radius = ballR } )
+	physics.addBody( ball, { density=1.0 , friction=0.1, bounce=1, radius = ballR, filter = ballFilter } )
 
 
 	return ball
@@ -34,12 +38,12 @@ function PlayObjects:newStar( )
 	star:setFillColor(0,0,0)
 	star.type = "star"
 
-	physics.addBody( star, "static", { density=1.0 , friction=0.5, bounce=0.6, radius = starR } )
+	physics.addBody( star, "static", { density=0 , friction=0, bounce=0, radius = starR, filter = ballFilter } )
 	star.isSensor = true
 
 	local function onLocalCollision( self, event )
-    	print( event.target )
-    	print( event.other )           --the first object in the collision
+    	--print( event.target )
+    	--print( event.other )           --the first object in the collision
     	display.remove(event.target)
 	end
 	star.collision = onLocalCollision
@@ -50,21 +54,21 @@ function PlayObjects:newStar( )
 end
 
 function PlayObjects:newGoal()
-	local goalRadius = ballR*2.5
+	local goalRadius = ballR*4
 	local goal = display.newCircle( 0, 0, goalRadius )
 	goal:setFillColor(1,0,0)
 	goal.type = "goal"
 
-	physics.addBody( goal, "static", { density=1.0 , friction=0.5, bounce=0.3, radius = goalRadius } )
+	physics.addBody( goal, "static", { density=1.0 , friction=0.5, bounce=0.3, radius = goalRadius, filter = ballFilter } )
 	goal.isSensor = true
 
 	local function onLocalCollision( self, event )
-    	print( event.target )        --the first object in the collision
-    	print( event.other )         --the second object in the collision
-    	print( event.selfElement )   --the element (number) of the first object which was hit in the collision
-    	print( event.otherElement )  --the element (number) of the second object which was hit in the collision
+    	--print( event.target )        --the first object in the collision
+    	--print( event.other )         --the second object in the collision
+    	---print( event.selfElement )   --the element (number) of the first object which was hit in the collision
+    	--print( event.otherElement )  --the element (number) of the second object which was hit in the collision
+    	
   		composer.gotoScene( "levels.levelintermission" )
-    	physics.pause()
 	end
 	goal.collision = onLocalCollision
 	goal:addEventListener( "collision", goal )

@@ -63,19 +63,19 @@ function fingerPaint.newCanvas(...)
 	local params = arguments[1]
 	if params == nil then params = {} end
 
-	print(params.group)
-	print(params.scrollView)
-	print(params.scrollView.isLocked)
-	
+	--print(params.group)
+	--print(params.scrollView)
+	--print(params.scrollView.isLocked)
 
-	
+	local group = params.group
+	local scrollView = params.scrollView
+	local statusBar = params.statusBar
+	local lineFilter = { categoryBits=2, maskBits=5 } 
+
 	--------------------------------------------------------------------------------
 	-- LOCALIZE PARAMS & SET DEFAULTS
 	--------------------------------------------------------------------------------
 	local strokeWidth = params.strokeWidth or 10
-	local group = params.group
-	local scrollView = params.scrollView
-
 	local canvasColor = params.canvasColor or {1, 1, 1, 1}
 	local paintColor = params.paintColor or {0, 0, 0, 1}
 		if paintColor[4] == nil then paintColor[4] = 1 end
@@ -96,6 +96,9 @@ function fingerPaint.newCanvas(...)
 	canvas.isActive = isActive
 	canvas.paintR, canvas.paintG, canvas.paintB, canvas.paintA = paintR, paintG, paintB, paintA
 	canvas.canvasR, canvas.canvasG, canvas.canvasB, canvas.canvasA = canvasR, canvasG, canvasB, canvasA
+	canvas.distanceDrawn = 0
+	canvas.totalDistance = params.totalDistance or _W*.3
+
 	
 	--------------------------------------------------------------------------------
 	-- CREATE CANVAS BACKGROUND RECT
@@ -133,15 +136,18 @@ function fingerPaint.newCanvas(...)
 	-- TOUCH EVENT HANDLER FUNCTION
 	--------------------------------------------------------------------------------
 	local function touch(event)
+	if isDrawing == true then
 		-- set local variables
 		local phase = event.phase
 		local target = event.target
 		local stroke = strokes[#strokes]
+
+		local scrollX, scrollY = scrollView:getContentPosition()
 		
 		-- recalculate touch cooridnates, taking into account canvas position
 		local canvasX, canvasY = canvas:localToContent(canvas.anchorX, canvas.anchorY)
 		local x = event.x -- canvasX
-		local y = event.y -- canvasY
+		local y = event.y - scrollY -- canvasY
 		local xStart = event.xStart - canvasX
 		local yStart = event.yStart - canvasY
 		
@@ -156,7 +162,7 @@ function fingerPaint.newCanvas(...)
 		local distance = getDistance(x, y, target.lastX, target.lastY)
 		
 		-- check for event phase & start, update, or end stroke accordingly
-		if phase == "began" and canvas.isActive then
+		if phase == "began" and canvas.isActive  and canvas.distanceDrawn <= canvas.totalDistance then
 			-- empty undone table
 			for i=#undone,1,-1 do
 				display.remove(undone[i])
@@ -170,23 +176,31 @@ function fingerPaint.newCanvas(...)
 			stroke = strokes[#strokes]
 			canvas:insert(stroke)
 			local circle = display.newCircle(stroke, x, y, circleRadius)
+				physics.addBody( circle, "static", { density=0, friction=0, bounce=0, radius = circleRadius, filter = lineFilter} )
 			group:insert(circle)
 			circle:setFillColor(paintR, paintG, paintB, paintA)
 			target.lastX, target.lastY = x, y
 
 
-		elseif phase=="moved" and touchBegan == true and distance > circleRadius*.5 then
+		elseif phase=="moved" and touchBegan == true and distance > circleRadius*.5 and canvas.distanceDrawn <= canvas.totalDistance then
 
-					print("oldX: ".. target.lastX .. " oldY: ".. target.lastY)
-					print("x: ".. x .. " y: " ..  y)
+					--print("oldX: ".. target.lastX .. " oldY: ".. target.lastY)
+					--print("x: ".. x .. " y: " ..  y)
+
+					canvas.distanceDrawn = canvas.distanceDrawn + distance
+					statusBar:setProgress( (canvas.totalDistance - canvas.distanceDrawn)/canvas.totalDistance )
+					--print(distancetotan)
+
 
 					stroke.circle = display.newCircle(stroke, x, y, circleRadius)
 					stroke.circle:setFillColor(paintR, paintG, paintB, paintA)
 					group:insert(stroke.circle)
+					physics.addBody( stroke.circle, "static", { density=0, friction=0, bounce=0, radius = circleRadius, filter = lineFilter} )
 
 
 
 					stroke.line = display.newLine(stroke, target.lastX, target.lastY, x, y)
+					stroke.line.distance = distance
 					group:insert(stroke.line)
 
 					local angle = angleBetween( 0, 0 , target.lastX - x, target.lastY - y)
@@ -195,18 +209,20 @@ function fingerPaint.newCanvas(...)
 					local oldX = x - target.lastX
 					local oldY = y - target.lastY
 
-
+					
 					local rectShape={
 					 cosAngle,  sinAngle,
 					-cosAngle, -sinAngle,
 					oldX - cosAngle, oldY - sinAngle,
 					oldX + cosAngle, oldY + sinAngle }
 
+
+
 					
 
 
 
-					physics.addBody( stroke.line, "static", { density=0, friction=0, bounce=0, shape = rectShape} )
+					physics.addBody( stroke.line, "static", { density=1.0 , friction=0, bounce=1, shape = rectShape, filter = lineFilter} )
 
 										stroke.line:setStrokeColor(paintR, paintG, paintB, paintA)
 					stroke.line.strokeWidth = strokeWidth
@@ -219,17 +235,22 @@ function fingerPaint.newCanvas(...)
 			-- end stroke
 			display.getCurrentStage():setFocus(nil, event.id)
 			touchBegan = false
+			if canvas.distanceDrawn <= canvas.totalDistance then
 			local circle = display.newCircle(stroke, x, y, circleRadius)
-			circle:setFillColor(paintR, paintG, paintB, paintA)
-			group:insert(circle)
+				circle:setFillColor(paintR, paintG, paintB, paintA)
+				physics.addBody( circle, "static", { density=0, friction=0, bounce=0, radius = circleRadius, filter = lineFilter} )
+				group:insert(circle)
+			end
 
 			target.lastX, target.lastY = nil, nil
 
-			scrollView:setIsLocked( false ) 
+			scrollView:setIsLocked( false , "vertical" ) 
+			isDrawing = false
 
 			--canvas.isActive = false
 			return true
 		end
+	end
 	end
 	
 	--------------------------------------------------------------------------------

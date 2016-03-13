@@ -22,6 +22,10 @@ _G.phi = 1.61803398875
 
 _G.maxSpeed  = _W
 
+_G.forceFactor = _W*.4
+
+_G.isDrawing = false
+
 _G.font = "Dyslexie Regular"
 --attempting to get font to work
 --_G.font = "data\Dyslexie Regular LP129383 (1)"
