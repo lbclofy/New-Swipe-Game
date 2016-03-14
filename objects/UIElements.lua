@@ -12,15 +12,11 @@ function UIElements:newStart( gameBall, angle )
     -- NEED TO PUT IN THING TO STOP// WHY NOT JUST OVERLAY THAT 
 
 	function start:resetBall( ball )
-		print("RESSTING BALL")
-		print(ball)
 		start.ball = ball
 	end
 
 	
-
 	local function startGame( self, event )
-		print("applyingforce")
     	start.ball:applyForce( math.cos(math.rad(angle))*forceFactor, math.sin(math.rad(angle))*forceFactor, start.ball.x, start.ball.y)
 	    return true
 	end 
@@ -28,6 +24,25 @@ function UIElements:newStart( gameBall, angle )
 	start:addEventListener( "touch", start )
 
 	return start
+end
+
+function UIElements:newReset( gameBall )
+    
+    local reset = display.newText( "Reset", 0, 0, native.systemFont, 16 )
+    reset:setFillColor(0,0,0)
+    reset.ball = gameBall
+    -- NEED TO PUT IN THING TO STOP// WHY NOT JUST OVERLAY THAT 
+
+--[[
+    
+    local function resetBall( self, event )
+        start.ball:applyForce( math.cos(math.rad(angle))*forceFactor, math.sin(math.rad(angle))*forceFactor, start.ball.x, start.ball.y)
+        return true
+    end 
+    reset.touch = startGame
+    reset:addEventListener( "touch", reset )]]
+
+    return start
 end
 
 function UIElements:newMenu( )
@@ -55,8 +70,9 @@ function UIElements:newScroll( group, botY)
 	local function scrollListener( event )
 
 		local x, y = scrollView:getContentPosition()
-		--print("scrollY: " .. y )
+
     	local phase = event.phase
+        --[[
     	if ( phase == "began" ) then --print( "Scroll view was touched" )
     	elseif ( phase == "moved" ) then --print( "Scroll view was moved" )
    		elseif ( phase == "ended" ) then --print( "Scroll view was released" )
@@ -64,13 +80,13 @@ function UIElements:newScroll( group, botY)
 
     -- In the event a scroll limit is reached...
 	    if ( event.limitReached ) then
-	        if ( event.direction == "up" ) then print( "Reached bottom limit" )
-	        elseif ( event.direction == "down" ) then print( "Reached top limit" )
+	        if ( event.direction == "up" ) then 
+	        elseif ( event.direction == "down" ) then 
 	        elseif ( event.direction == "left" ) then print( "Reached right limit" )
 	        elseif ( event.direction == "right" ) then print( "Reached left limit" )
 	        end
 	    end
-
+]]
 	--    return true
 	end
 
@@ -163,15 +179,15 @@ local function eraseLine( event )
         elseif "ended" == phase or "cancelled" == phase then
             display.getCurrentStage():setFocus( nil )
             t.isFocus = false
-            t.canErase = false
-            print(t.canErase)
+           -- t.canErase = false
+
             local distance = math.sqrt((event.x - event.xStart) ^ 2 + (event.y - event.yStart) ^ 2)
             local transTime = distance/maxSpeed*1000
             local function listener()
             	 t.canErase = true
             end
 
-            transition.to( t, { time=transTime, x = xCoords, y = yCoords, easing = easing.outBack, onComplete = listener } )
+            --transition.to( t, { time=transTime, x = xCoords, y = yCoords, easing = easing.outBack, onComplete = listener } )
            
             
         end
@@ -186,12 +202,12 @@ end
 
 
 local function onLocalCollision( self, event )
-    print( event.target )        
-    print( event.other )  
+  --  print( event.target )        
+  --  print( event.other )  
     if self.canErase == true then
     	if (event.other.distance) then
-    		print ("ERASED DISTANCE : " .. event.other.distance )  
-    		print(canvas.totalDistance .. " " .. canvas.distanceDrawn)
+   -- 		print ("ERASED DISTANCE : " .. event.other.distance )  
+    --		print(canvas.totalDistance .. " " .. canvas.distanceDrawn)
     		canvas.distanceDrawn = canvas.distanceDrawn - event.other.distance
     	end   
     	status:setProgress( (canvas.totalDistance - canvas.distanceDrawn)/canvas.totalDistance )
@@ -202,19 +218,13 @@ local function onLocalCollision( self, event )
 end
 
 local function onLocalPostCollision( self, event )
-    print( event.target )        
-    print( event.other )  
     if self.canErase == true then
     	if (event.other.distance) then
-    		print ("ERASED DISTANCE : " .. event.other.distance )  
-    		print(canvas.totalDistance .. " " .. canvas.distanceDrawn)
     		canvas.distanceDrawn = canvas.distanceDrawn - event.other.distance
     	end   
     	status:setProgress( (canvas.totalDistance - canvas.distanceDrawn)/canvas.totalDistance )
-
     display.remove(event.other)
 	end
-
 end
 
     local eraser =  display.newCircle(  0, 0, eraseR )

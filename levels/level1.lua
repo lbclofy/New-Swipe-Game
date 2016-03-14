@@ -34,7 +34,7 @@ local function buildLevel( start )
     local group = display.newGroup()
 
     gameBall = po:newBall()
-    gameBall.x, gameBall.y = centerX, _H*.02
+    gameBall.x, gameBall.y = centerX, _H*.05
     group:insert(gameBall)
     start:resetBall( gameBall )
 
@@ -68,10 +68,15 @@ local function buildLevel( start )
 
 end
 
+local function buildStars()
+end
+
 local function resetLevel( start )
     display.remove(levelGroup)
     levelGroup = nil
     levelGroup = buildLevel( start ) 
+    -- gameBall.x, gameBall.y = centerX, _H*.05
+    --gameBall:setLinearVelocity( 0, 0 )
 end
 
 local function buildBorders( group1, group2, start, endY )
@@ -85,15 +90,15 @@ local function buildBorders( group1, group2, start, endY )
         local tm = timer.performWithDelay( 1, onTimer )
     end
 
-    local leftBorder = obs:newBorder(10, _H)
-    leftBorder.x, leftBorder.y = 0, centerY
-    group2:insert(leftBorder)
+    local leftBorder = obs:newBorder(10, endY)
+    leftBorder.x, leftBorder.y = 0, endY*.5
+    group1:insert(leftBorder)
     leftBorder.collision = resetCollision
     leftBorder:addEventListener( "collision", leftBorder )
 
-    local rightBorder = obs:newBorder(10, _H)
-    rightBorder.x, rightBorder.y = _W, centerY
-    group2:insert(rightBorder)
+    local rightBorder = obs:newBorder(10, endY)
+    rightBorder.x, rightBorder.y = _W,  endY*.5
+    group1:insert(rightBorder)
     rightBorder.collision = resetCollision
     rightBorder:addEventListener( "collision", rightBorder )
 
@@ -158,7 +163,7 @@ function scene:create( event )
     sceneGroup:insert(draw)
 
     local erase = ui:newEraser(gameBall, canvas, status, _W*.6, _H*.05 )
-    sceneGroup:insert(erase)
+    scrollGroup:insert(erase)
 
 
 

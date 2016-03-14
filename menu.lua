@@ -1,5 +1,6 @@
 local composer = require( "composer" )
 local lm = require("ogt_levelmanager")
+local widget = require( "widget" )
 
 local scene = composer.newScene()
 
@@ -104,9 +105,97 @@ local function swipe( event, params )
 
 end
 
-local function createSettings(group)
+local function createSettings()
+    local group = display.newGroup()
+    group.x,group.y = centerX + _W, centerY
+  --  group.main = display.newCircle( group , 0,0, _W*.4)
+   -- group.main:setFillColor(0,1,0,.25)
+    group.text = display.newText( group , "Settings", 0, -_H*.45, font, 36 )
+    group.text:setFillColor(0,0,0)
+
+    local switchText = display.newText( "Night Colors", 0, 160, native.systemFont, 14 )
+    switchText.anchorY = 0
+    switchText:setFillColor( 1,1,0 )
+    group:insert( switchText )
+
+    local function onOffSwitchListener( event )
+        if switchText.text == "Day Colors" then
+            switchText.text = "Night Colors"
+        else
+            switchText.text = "Day Colors"
+        end
+    end
+
+    -- Create a default on/off switch (using widget.setTheme)
+    local onOffSwitch = widget.newSwitch
+    {
+        left = 190,
+        top = 180,
+        --onPress = onOffSwitchListener,
+        onRelease = onOffSwitchListener,
+    }
+    group:insert( onOffSwitch )
+    onOffSwitch.x = switchText.x
+    onOffSwitch.y = switchText.y + 50
+
+
+
+    local switchText = display.newText( "Music is On", 0, -160, native.systemFont, 14 )
+    switchText.anchorY = 0
+    switchText:setFillColor( 1,1,0 )
+    group:insert( switchText )
+
+    local function onOffSwitchListener( event )
+        if switchText.text == "Music is On" then
+            switchText.text = "Music is Off"
+        else
+            switchText.text = "Music is On" 
+        end
+    end
+
+    -- Create a default on/off switch (using widget.setTheme)
+    local onOffSwitch = widget.newSwitch
+    {
+        left = 190,
+        top = 180,
+        --onPress = onOffSwitchListener,
+        onRelease = onOffSwitchListener,
+    }
+    group:insert( onOffSwitch )
+    onOffSwitch.x = switchText.x
+    onOffSwitch.y = switchText.y + 50
+
+
+
+    local switchText = display.newText( "SFX is On", 0, 0, native.systemFont, 14 )
+    switchText.anchorY = 0
+    switchText:setFillColor( 1,1,0 )
+    group:insert( switchText )
+
+    local function onOffSwitchListener( event )
+        if switchText.text == "SFX is On" then
+            switchText.text = "SFX is Off"
+        else
+            switchText.text = "SFX is On" 
+        end
+    end
+
+    -- Create a default on/off switch (using widget.setTheme)
+    local onOffSwitch = widget.newSwitch
+    {
+        left = 190,
+        top = 180,
+        --onPress = onOffSwitchListener,
+        onRelease = onOffSwitchListener,
+    }
+    group:insert( onOffSwitch )
+    onOffSwitch.x = switchText.x
+    onOffSwitch.y = switchText.y + 50
+
+    return group
 
 end
+
 
 -- "scene:create()"
 function scene:create( event )
@@ -144,12 +233,7 @@ function scene:create( event )
     supportNav.text = display.newText( supportNav , "SUPPORT US", 0, 0, font, 36 )
     levelSelNav.text:setFillColor(0,0,0)
 
-    local settingsNav = display.newGroup()
-    settingsNav.x,settingsNav.y = centerX + _W, centerY
-    settingsNav.main = display.newCircle( settingsNav , 0,0, _W*.4)
-    settingsNav.main:setFillColor(0,1,0,.25)
-    settingsNav.text = display.newText( settingsNav , "Settings", 0, 0, font, 36 )
-    settingsNav.text:setFillColor(0,0,0)
+    local settingsNav = createSettings()
     
     menuScreens[0] = contNav
     menuScreens[0].leftText = " "
