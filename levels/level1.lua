@@ -71,20 +71,23 @@ end
 local function buildStars()
 end
 
-local function resetLevel( start )
+local function resetLevel( start, canvas, status )
     display.remove(levelGroup)
     levelGroup = nil
     levelGroup = buildLevel( start ) 
+    print(canvas)
+    canvas:ghost()
+    status:setProgress( 1)
     -- gameBall.x, gameBall.y = centerX, _H*.05
     --gameBall:setLinearVelocity( 0, 0 )
 end
 
-local function buildBorders( group1, group2, start, endY )
+local function buildBorders( group1, group2, start, endY, canvas, status )
 
     local function resetCollision( self, event )
        
         local function onTimer( event )
-            resetLevel(start)
+            resetLevel(start, canvas, status)
             group1:insert( levelGroup )
         end
         local tm = timer.performWithDelay( 1, onTimer )
@@ -134,7 +137,7 @@ function scene:create( event )
     sceneGroup:insert(start)
 
     
-    buildBorders( scrollGroup, sceneGroup, start , goalY + ballR * 8)
+   
     levelGroup = buildLevel( start )
     scrollGroup:insert( levelGroup )
 
@@ -157,6 +160,9 @@ function scene:create( event )
     
     local canvas = drawUI.newCanvas({group = scrollGroup,  scrollView = bg, statusBar = status, totalDistance = lvls.drawLength[1]})
     sceneGroup:insert(canvas)
+    print(canvas)
+
+     buildBorders( scrollGroup, sceneGroup, start , goalY + ballR * 8, canvas, status)
 
     local draw = ui:newDraw( bg, canvas )
     draw.x, draw.y = _W*.25, _H*.05

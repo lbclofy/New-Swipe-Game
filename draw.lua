@@ -69,13 +69,15 @@ function fingerPaint.newCanvas(...)
 
 	local group = params.group
 	local scrollView = params.scrollView
+	local view = scrollView:getView() 
+	print(view.height)
 	local statusBar = params.statusBar
 	local lineFilter = { categoryBits=2, maskBits=5 } 
 
 	--------------------------------------------------------------------------------
 	-- LOCALIZE PARAMS & SET DEFAULTS
 	--------------------------------------------------------------------------------
-	local strokeWidth = params.strokeWidth or 10
+	local strokeWidth = params.strokeWidth or ballR
 	local canvasColor = params.canvasColor or {1, 1, 1, 1}
 	local paintColor = params.paintColor or {0, 0, 0, 1}
 		if paintColor[4] == nil then paintColor[4] = 1 end
@@ -87,6 +89,8 @@ function fingerPaint.newCanvas(...)
 	local y = params.y or centerY
 	local isActive = params.isActive or true
 	local circleRadius = strokeWidth *.5
+
+	local alphaFactor = 0.4
 	
 	--------------------------------------------------------------------------------
 	-- CREATE CANVAS CONTAINER OBJECT
@@ -106,12 +110,24 @@ function fingerPaint.newCanvas(...)
 	local background = display.newRect(canvas, _W, _H, _W * 3, _H * 3)
 	background:setFillColor(0, 0, 0, 0)
 	background.isHitTestable = true
+
+--	snapshot:toFront()
+	--snapshot.anchorX, snapshot.anchorY = 1,1
+	--[[local snapshot = display.newSnapshot(_W,_H)
+	snapshot:translate( centerX, centerY)
+	group:insert(snapshot)
+	local circle = display.newCircle( 0, 0, _W*.5)
+	snapshot.group:insert( circle ) 
+	snapshot.alpha = .5]]
 		
 	--------------------------------------------------------------------------------
 	-- CREATE TABLE TO HOLD PAINT STROKES
 	--------------------------------------------------------------------------------
 	canvas.strokes = {}
 	local strokes = canvas.strokes
+
+	canvas.ghosts = {}
+	local ghosts = canvas.ghosts
 	
 	--------------------------------------------------------------------------------
 	-- CREATE TABLE TO HOLD UNDONE PAINT STROKES
@@ -135,6 +151,7 @@ function fingerPaint.newCanvas(...)
 	--------------------------------------------------------------------------------
 	-- TOUCH EVENT HANDLER FUNCTION
 	--------------------------------------------------------------------------------
+	
 	local function touch(event)
 	if isDrawing == true then
 		-- set local variables
@@ -157,7 +174,17 @@ function fingerPaint.newCanvas(...)
 		
 		if target.lastX == nil then
 			target.lastX, target.lastY = x, y
+			target.prevpnX, target.prevpnY = x,y 
 		end
+
+		local pnX = target.prevpnX*( 1 - alphaFactor) + x*alphaFactor
+		local pnY = target.prevpnY*( 1 - alphaFactor) + y*alphaFactor
+		x = pnX
+		y = pnY
+
+		print(event.x .. " : " .. pnX)
+		print(event.y .. " : " .. pnY)
+
 		
 		local distance = getDistance(x, y, target.lastX, target.lastY)
 		
@@ -174,10 +201,10 @@ function fingerPaint.newCanvas(...)
 
 			strokes[#strokes+1] = display.newGroup()
 			stroke = strokes[#strokes]
-			canvas:insert(stroke)
+			group:insert(stroke)
 			local circle = display.newCircle(stroke, x, y, circleRadius)
 				physics.addBody( circle, "static", { density=0, friction=0, bounce=0, radius = circleRadius, filter = lineFilter} )
-			group:insert(circle)
+			--group:insert(circle)
 			circle:setFillColor(paintR, paintG, paintB, paintA)
 			target.lastX, target.lastY = x, y
 
@@ -194,14 +221,14 @@ function fingerPaint.newCanvas(...)
 
 					stroke.circle = display.newCircle(stroke, x, y, circleRadius)
 					stroke.circle:setFillColor(paintR, paintG, paintB, paintA)
-					group:insert(stroke.circle)
+					--group:insert(stroke.circle)
 					physics.addBody( stroke.circle, "static", { density=0, friction=0, bounce=0, radius = circleRadius, filter = lineFilter} )
 
 
 
 					stroke.line = display.newLine(stroke, target.lastX, target.lastY, x, y)
 					stroke.line.distance = distance
-					group:insert(stroke.line)
+					--group:insert(stroke.line)
 
 					local angle = angleBetween( 0, 0 , target.lastX - x, target.lastY - y)
 					local cosAngle = math.cos(angle)*circleRadius
@@ -229,6 +256,7 @@ function fingerPaint.newCanvas(...)
 					
 
 					target.lastX, target.lastY = x, y
+					target.prevpnX, target.prevpnY = pnX, pnY
 
 
 		elseif (phase == "cancelled" or phase == "ended") and touchBegan == true then
@@ -239,7 +267,7 @@ function fingerPaint.newCanvas(...)
 			local circle = display.newCircle(stroke, x, y, circleRadius)
 				circle:setFillColor(paintR, paintG, paintB, paintA)
 				physics.addBody( circle, "static", { density=0, friction=0, bounce=0, radius = circleRadius, filter = lineFilter} )
-				group:insert(circle)
+				--group:insert(circle)
 			end
 
 			target.lastX, target.lastY = nil, nil
@@ -251,8 +279,9 @@ function fingerPaint.newCanvas(...)
 			return true
 		end
 	end
+	--print(#strokes)
 	end
-	
+
 	--------------------------------------------------------------------------------
 	-- ADD TOUCH LISTENER TO CANVAS
 	--------------------------------------------------------------------------------
@@ -321,6 +350,8 @@ function fingerPaint.newCanvas(...)
 	-- FUNCTION TO ERASE ALL PAINT STROKES
 	--------------------------------------------------------------------------------
 	function canvas:erase()
+		print("ERASING")
+		print(#strokes)
 		if #strokes>0 then
 			for n = #strokes, 1, -1 do
 				local stroke = strokes[n]
@@ -329,6 +360,47 @@ function fingerPaint.newCanvas(...)
 				display.remove(stroke)
 				undone = {}
 			end
+			canvas.distanceDrawn = 0
+		end
+	end
+
+	function canvas:ghost()
+
+		--local circle = display.newCircle( 0, 0, _W*.25)
+		--snapshot.group:insert( circle ) 
+		print(#ghosts)
+		if #ghosts>0 then
+			for n = #ghosts, 1, -1 do
+				local stroke = ghosts[n]
+				table.remove(ghosts, n)
+				ghosts[n] = nil
+				display.remove(stroke)
+			end
+		end
+
+		if #strokes>0 then
+			local snapshot = display.newSnapshot( _W, view.height )
+				snapshot:translate( display.contentCenterX, display.contentCenterY )
+			for n = #strokes, 1, -1 do
+
+				
+
+				local stroke = strokes[n]
+				
+				table.remove(strokes, n)
+				strokes[n] = nil
+				for i=1,stroke.numChildren do
+    				physics.removeBody( stroke[i] )
+
+				end 
+				stroke.x, stroke.y = stroke.x - centerX, stroke.y - centerY
+				ghosts[#ghosts+1] = snapshot
+				snapshot.group:insert( stroke ) 
+				snapshot.alpha = .5
+				group:insert(snapshot)
+
+			end
+		canvas.distanceDrawn = 0
 		end
 	end
 	
